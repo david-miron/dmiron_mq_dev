@@ -28,56 +28,64 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 // var token_url = "https://oauth.machineq.net/oauth2/token"
 // var token = loginOAUTHApplication(api_url, token_url)
 
-
 function get_call(url) {
-  fetch(url, { 
-     method: 'get', 
-     headers: new Headers({
+  return fetch(url, { 
+     method: 'GET', 
+     headers: {
        'Accept': 'application/json',
        'Content-Type': 'application/json',
        'Authorization': 'Bearer jP8d2jSAqUFfWeckMNNoWDYLrlhjTXkZ4f72_3pSbis.HDpruBsMyF8mI6AIU2zReC31wHoozvH7ciZ0EjVZLKo'
-     })
+     },
     })
-    .then(
-      function(response) {
-        if (response.status !== 200) {
-          console.log('Looks like there was a problem. Status Code: ' +
-            response.status);
-          return;
-        }
+    .then((response) => response.json())
+      .then((responseData) => {
+        //console.log(responseData);
+        return responseData;
+      })
+      .catch(error => console.warn(error));
+    }
 
-        // Examine the text in the response
-        response.json().then(function(data) {
-          console.log(data);
-          var temp = data.Data[0].Payload['temperature']
-          console.log(temp)
-          document.getElementById("temperature").innerHTML = temp + "\xB0 Celcius";
-        });
-      }
-    )
-    .catch(function(err) {
-      console.log('Fetch Error :-S', err);
+var minute = setInterval(temp_update, 60000);
+
+function temp_update() {
+  var timeseries_url ='https://api.machineq.net/v1/timeseries/devices/payload/70B3D53E6FFFFD63/span/1/Minute/chunksize/1/Minute?Timezone=US%2FEastern'
+  get_call(timeseries_url).then(
+    function(response) {
+      var temp = response.Data[0].Payload['temperature']
+      console.log(temp)
+      document.getElementById("temperature").innerHTML = temp + "\xB0 Celcius";
     });
 }
+temp_update();
 
-var timeseries_url ='https://api.machineq.net/v1/timeseries/devices/payload/70B3D53E6FFFFD63/span/1/Minute/chunksize/1/Minute?Timezone=US%2FEastern'
-get_call(timeseries_url)
+var second = setInterval(clock, 1000);
 
-var myVar = setInterval(myTimer, 60000);
-
-function myTimer() {
-  var timeseries_url ='https://api.machineq.net/v1/timeseries/devices/payload/70B3D53E6FFFFD63/span/1/Minute/chunksize/1/Minute?Timezone=US%2FEastern'
-  get_call(timeseries_url)
-
-}
-
-
-var myVar = setInterval(myTimer1, 1000);
-
-function myTimer1() {
+function clock() {
   var d = new Date();
   document.getElementById("demo").innerHTML = d.toLocaleTimeString();
 }
+
+function get_num_devices(){
+  var devices_url ='https://api.machineq.net/v1/devices'
+  get_call(devices_url).then(
+    function(response) {
+      var num_devices = response.Devices.length
+      console.log(num_devices)
+      document.getElementById("num_devices").innerHTML = num_devices;
+    });
+}
+get_num_devices();
+
+function get_num_gateways(){
+  var gateways_url ='https://api.machineq.net/v1/gateways'
+  get_call(gateways_url).then(
+    function(response) {
+      var num_gateways = response.Gateways.length
+      console.log(num_gateways)
+      document.getElementById("num_gateways").innerHTML = num_gateways;
+    });
+}
+get_num_gateways();
 
 </script>
 
@@ -133,42 +141,42 @@ function myTimer1() {
   <div class="w3-row-padding w3-margin-bottom">
     <div class="w3-quarter">
       <div class="w3-container w3-red w3-padding-16">
-        <div class="w3-left"><i class="fa fa-comment w3-xxxlarge"></i></div>
+        <div class="w3-left"><i class="fa fa-male w3-xxxlarge"></i></div>
         <div class="w3-right">
-          <h3>52</h3>
+          <h3 id="num_devices">
         </div>
         <div class="w3-clear"></div>
-        <h4>Messages</h4>
+        <h4>Devices</h4>
       </div>
     </div>
     <div class="w3-quarter">
       <div class="w3-container w3-blue w3-padding-16">
         <div class="w3-left"><i class="fa fa-eye w3-xxxlarge"></i></div>
         <div class="w3-right">
-          <h3>99</h3>
+          <h3 id="num_gateways">
         </div>
         <div class="w3-clear"></div>
-        <h4>Views</h4>
+        <h4>Gateways</h4>
       </div>
     </div>
     <div class="w3-quarter">
       <div class="w3-container w3-teal w3-padding-16">
         <div class="w3-left"><i class="fa fa-share-alt w3-xxxlarge"></i></div>
         <div class="w3-right">
-          <h3>23</h3>
+          <h3> Temp </h3>
         </div>
         <div class="w3-clear"></div>
-        <h4>Shares</h4>
+        <h4> Temp </h4>
       </div>
     </div>
     <div class="w3-quarter">
       <div class="w3-container w3-orange w3-text-white w3-padding-16">
         <div class="w3-left"><i class="fa fa-users w3-xxxlarge"></i></div>
         <div class="w3-right">
-          <h3>50</h3>
+          <h3>Temp</h3>
         </div>
         <div class="w3-clear"></div>
-        <h4>Users</h4>
+        <h4>Temp</h4>
       </div>
     </div>
   </div>
