@@ -11,8 +11,44 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 </style>
 <body class="w3-light-grey">
 
-<script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['table']});
+      google.charts.load('current', {'packages':['corechart']});
+      //google.charts.setOnLoadCallback(drawTable);
 
+      function drawTable(array) {
+        //console.log(array)
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Time');
+        data.addColumn('number', 'Temperature');
+        for (i = 0; i < array.length; i++) {
+          var temp = parseFloat(array[i].Payload['temperature'])
+          //console.log(temp)
+          var time = array[i].Time.slice(11,16)
+          //console.log(time)
+          data.addRows([[time, temp]])
+        }
+        //console.log(data)
+        var table = new google.visualization.Table(document.getElementById('table_div'));
+
+        table.draw(data, {showRowNumber: true, width: '100%', height: '100%'});
+
+        var options = {
+          title: 'Living Room Temperature',
+          curveType: 'function',
+          legend: { position: 'bottom' },
+          width: "100%",
+          height: "100%"
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+        chart.draw(data, options);
+      }
+    </script>
+
+<script>
 var client_id = 'd48a3522-738a-4bde-89fd-c79f41cf02d4'
 var client_secret = 'slfB5KFMZo2kke2QQZSIXEiN3OHmkE6s'
 var token;
@@ -34,8 +70,8 @@ function get_token(client_id, client_secret){
   })
   .then(function (data) {
   // Log the API data
-    console.log('token', data);
-    console.log('token', data.access_token);
+    //console.log('token', data);
+    //console.log('token', data.access_token);
     token = data.access_token
   })
   .catch(function (err) {
@@ -46,7 +82,7 @@ function get_token(client_id, client_secret){
 
 get_token(client_id, client_secret)
 
-setTimeout(function(){ console.log(token) }, 1000);
+// setTimeout(function(){ console.log(token) }, 1000);
 
 function get_call(url) {
   return fetch(url, { 
@@ -68,12 +104,13 @@ function get_call(url) {
 var minute = setInterval(temp_update, 1000 * 60);
 
 function temp_update() {
-  var timeseries_url ='https://api.machineq.net/v1/timeseries/devices/payload/70B3D53E6FFFFD63/span/1/Minute/chunksize/1/Minute?Timezone=US%2FEastern'
+  var timeseries_url ='https://api.machineq.net/v1/timeseries/devices/payload/70B3D53E6FFFFD63/span/10/Minute/chunksize/1/Minute?Timezone=US%2FEastern'
   get_call(timeseries_url).then(
     function(response) {
-      var temp = response.Data[0].Payload['temperature']
-      console.log(temp)
-      document.getElementById("temperature").innerHTML = temp + "\xB0 Celcius";
+      var temp = response.Data[9].Payload['temperature']
+      //console.log(response.Data)
+      //document.getElementById("temperature").innerHTML = temp + "\xB0 Celcius";
+      drawTable(response.Data)
     });
 }
 setTimeout(temp_update, 3000);
@@ -90,7 +127,7 @@ function get_num_devices(){
   get_call(devices_url).then(
     function(response) {
       var num_devices = response.Devices.length
-      console.log(num_devices)
+      //console.log(num_devices)
       document.getElementById("num_devices").innerHTML = num_devices;
     });
 }
@@ -101,7 +138,7 @@ function get_num_gateways(){
   get_call(gateways_url).then(
     function(response) {
       var num_gateways = response.Gateways.length
-      console.log(num_gateways)
+      //console.log(num_gateways)
       document.getElementById("num_gateways").innerHTML = num_gateways;
     });
 }
@@ -205,13 +242,14 @@ setTimeout(get_num_gateways, 3000);
   <div class="w3-panel">
     <div class="w3-row-padding" style="margin:0 -16px">
       <div class="w3-third">
-        <h5>Regions</h5>
-        <p id="demo"></p>
+        <h5 id='demo'></h5>
         <p id="temperature"></p>
+        <p id="table_div"></p>
       </div>
       <div class="w3-twothird">
         <h5>Feeds</h5>
-        <table class="w3-table w3-striped w3-white">
+        <p id="curve_chart"></p>
+        <!-- <table class="w3-table w3-striped w3-white">
           <tr>
             <td><i class="fa fa-user w3-text-blue w3-large"></i></td>
             <td>New record, over 90 views.</td>
@@ -247,7 +285,7 @@ setTimeout(get_num_gateways, 3000);
             <td>New shares.</td>
             <td><i>39 mins</i></td>
           </tr>
-        </table>
+        </table> -->
       </div>
     </div>
   </div>
