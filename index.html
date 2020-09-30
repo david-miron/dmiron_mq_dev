@@ -13,20 +13,40 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 
 <script>
 
-//var data = {'grant_type': 'client_credentials'}
-// print("calling token url : {token_url}".format(token_url=token_url))
-// print("client_id : {client_id}".format(client_id=client_id))
-//access_token_response = requests.post(token_url, data=data, allow_redirects=False, auth=(client_id, client_secret))
-// print("token response headers : {rheader}".format(rheader=access_token_response.headers))
-// print("token response text : {rtext}".format(rtext=access_token_response.text))
-//var tokens = json.loads(access_token_response.text)
-//var access_token = tokens['access_token']
-// print("access token : {access_token}".format(access_token=access_token))
-//var token = "Bearer " + access_token
+var client_id = 'd48a3522-738a-4bde-89fd-c79f41cf02d4'
+var client_secret = 'slfB5KFMZo2kke2QQZSIXEiN3OHmkE6s'
+var token;
 
-// var api_url = "https://api.machineq.net/v1"
-// var token_url = "https://oauth.machineq.net/oauth2/token"
-// var token = loginOAUTHApplication(api_url, token_url)
+var hour = setInterval( function() {get_token();} , 1000 * 60 * 60);
+
+function get_token(client_id, client_secret){
+  fetch("https://oauth.machineq.net/oauth2/token", { 
+      method: 'POST', 
+      redirect: 'manual',
+      body: 'grant_type=client_credentials&client_id=' + client_id + '&client_secret=' + client_secret,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+  })
+  .then(function (resp) {
+  // Return the response as JSON
+    return resp.json();
+  })
+  .then(function (data) {
+  // Log the API data
+    console.log('token', data);
+    console.log('token', data.access_token);
+    token = data.access_token
+  })
+  .catch(function (err) {
+  // Log any errors
+    console.log('something went wrong', err);
+  });
+}
+
+get_token(client_id, client_secret)
+
+setTimeout(function(){ console.log(token) }, 1000);
 
 function get_call(url) {
   return fetch(url, { 
@@ -34,7 +54,7 @@ function get_call(url) {
      headers: {
        'Accept': 'application/json',
        'Content-Type': 'application/json',
-       'Authorization': 'Bearer jP8d2jSAqUFfWeckMNNoWDYLrlhjTXkZ4f72_3pSbis.HDpruBsMyF8mI6AIU2zReC31wHoozvH7ciZ0EjVZLKo'
+       'Authorization': 'Bearer ' + token
      },
     })
     .then((response) => response.json())
@@ -43,9 +63,9 @@ function get_call(url) {
         return responseData;
       })
       .catch(error => console.warn(error));
-    }
+}
 
-var minute = setInterval(temp_update, 60000);
+var minute = setInterval(temp_update, 1000 * 60);
 
 function temp_update() {
   var timeseries_url ='https://api.machineq.net/v1/timeseries/devices/payload/70B3D53E6FFFFD63/span/1/Minute/chunksize/1/Minute?Timezone=US%2FEastern'
@@ -56,7 +76,7 @@ function temp_update() {
       document.getElementById("temperature").innerHTML = temp + "\xB0 Celcius";
     });
 }
-temp_update();
+setTimeout(temp_update, 3000);
 
 var second = setInterval(clock, 1000);
 
@@ -74,7 +94,7 @@ function get_num_devices(){
       document.getElementById("num_devices").innerHTML = num_devices;
     });
 }
-get_num_devices();
+setTimeout(get_num_devices, 3000);
 
 function get_num_gateways(){
   var gateways_url ='https://api.machineq.net/v1/gateways'
@@ -85,7 +105,7 @@ function get_num_gateways(){
       document.getElementById("num_gateways").innerHTML = num_gateways;
     });
 }
-get_num_gateways();
+setTimeout(get_num_gateways, 3000);
 
 </script>
 
