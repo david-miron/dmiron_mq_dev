@@ -70,7 +70,7 @@ function initMap() {
         data.addColumn('string', 'Time');
         data.addColumn('number', 'Temperature');
         for (i = 0; i < array.length; i++) {
-          var temp = parseFloat(array[i].Payload['temperature'])
+          var temp = (parseFloat(array[i].Payload['temperature']) * (9/5)) + 32
           //console.log(temp)
           var time = array[i].Time.slice(11,16)
           //console.log(time)
